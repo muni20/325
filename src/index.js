@@ -1,4 +1,5 @@
 import Deck from "./deck.js"
+import openSocket from 'socket.io'
 FBInstant.initializeAsync()
 .then(function(){
     console.log("loaded")
