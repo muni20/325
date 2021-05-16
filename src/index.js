@@ -1,9 +1,13 @@
 import Deck from "./deck.js"
-import openSocket from 'socket.io'
+import Table from "./deck.js"
+import PlayerDeck from "./deck.js"
+import Round from "./deck.js"
+
 FBInstant.initializeAsync()
-.then(function(){
-    console.log("loaded")
-})
+    .then(function () {
+        console.log("loaded")
+    })
+
 document.addEventListener("DOMContentLoaded", () => {
     //All global querySelector Goes here
 
@@ -16,37 +20,36 @@ document.addEventListener("DOMContentLoaded", () => {
     const trumpDiv = document.querySelector('.trump')
     const turnDisplay = document.querySelector('.turn-display')
     const tablePit = document.querySelector('.table-pit')
-    let sad = true
     //All global Variables Goes Here
     const removeCardsinDeck = []
     let player2Deck, selectATrump, selectedTrump,
         p1 = [{ 'cards': [] }], p2 = [{ 'cards': [] }], p3 = [{ 'cards': [] }],
         gameMode = "singlePlayer", playerNum = 0, ready = false, enemyReady = false, currentTurnSuit,
-        player1DeckCardIndex,player2DeckCardIndex, player3DeckCardIndex
+        player1DeckCardIndex, player2DeckCardIndex, player3DeckCardIndex, tablePitLength
     const deck = new Deck()
-    const CARD_VALUE_MAP = {
-        "6": 6,
-        "7": 7,
-        "8": 8,
-        "9": 9,
-        "10": 10,
-        "J": 11,
-        "Q": 12,
-        "K": 13,
-        "A": 14,
-    }
+    const CARD_VALUE_MAP = {"6": 6,"7": 7,"8": 8,"9": 9,"10": 10,"J": 11,"Q": 12,"K": 13,"A": 14}
 
     //All Game Logic variable, like table created cards dispensed to players
     let isGameOver = false, currentPlayer = 'PlayerOne', goTurn = 'PlayerOne', FirstGo = '', circleTurn,
-        roundCount = 1, playerDetails = [
-            { player: '', Go: 1, Deck: [], Turn: true },
-            { player: '', Go: 2, Deck: [], Turn: false },
-            { player: '', Go: 3, Deck: [], Turn: false }
+        roundCount = 1, _dragStart, playerDetails = [
+            { player: '', Go: 0, Deck: [], Turn: true },
+            { player: '', Go: 1, Deck: [], Turn: false },
+            { player: '', Go: 2, Deck: [], Turn: false }
         ],
-        thisTurnPit = [{ player: '', card: { suit: null, value: null } }]
-
-    startGame()
+        thisTurnPit = [
+            // { player: '', card: { suit: null, value: null, cardValue: null } },
+            // { player: '', card: { suit: null, value: null, cardValue: null } },
+            // { player: '', card: { suit: null, value: null, cardValue: null } }
+        ],playerObj = {}, cardObj={card:{}}
+    window.addEventListener('DOMContentLoaded', () => {
+        startGame()
+    })
     function startGame() {
+        const table = new Table()
+        table.gameMode = 'Singlelayer'
+        // table.maxRounds = 9
+        table.test = 'muni'
+        console.log(table.gameMode,table.maxRounds)
         loopDeleteCards(removeCardsinDeck)
         deck.removeCards(removeCardsinDeck)
         deck.shuffle()
@@ -176,43 +179,46 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function updateNumberOfCards(p1, p2, p3) {
-        let div;
+        let div1,div2,div3
         player1SlotDeck.innerText = playerDetails[0].Deck.numberOfCards
         p1.cards.forEach((e) => {
-            div = document.createElement('div')
-            div.classList.add('card', e.suit === "&hearts;" || e.suit === "&diams;" ? "red" : "black")
-            div.dataset.suit = `${e.suit}`
-            div.dataset.value = `${e.value}`
-            div.innerHTML = `${e.suit}`
-            div.dataset.id = `${playerDetails[0].player}`
-            if (playerDetails[0].player === 'playerOne') div.setAttribute("draggable", "true")
+            div1 = document.createElement('div')
+            div1.classList.add('card', e.suit === "&hearts;" || e.suit === "&diams;" ? "red" : "black")
+            div1.dataset.suit = `${e.suit}`
+            div1.dataset.value = `${e.value}`
+            div1.innerHTML = `${e.suit}`
+            div1.dataset.id = `${playerDetails[0].player}`
+            if (playerDetails[0].player === 'playerOne') div1.setAttribute("draggable", "true")
 
-            player1Hand.appendChild(div)
+            player1Hand.appendChild(div1)
+            // console.log(playerDetails[0].Deck,p1)
+            
         })
         computer2SlotDeck.innerHTML = playerDetails[1].Deck.numberOfCards
         p2.cards.forEach((e) => {
-            div = document.createElement('div')
-            div.classList.add('card', e.suit === "&hearts;" || e.suit === "&diams;" ? "red" : "black")
-            div.dataset.suit = `${e.suit}`
-            div.dataset.value = `${e.value}`
-            div.innerHTML = `${e.suit}`
-            div.dataset.id = `${playerDetails[1].player}`
-            if (playerDetails[1].player === 'playerOne') div.setAttribute("draggable", "true")
-            computer1Hand.appendChild(div)
+            div2 = document.createElement('div')
+            div2.classList.add('card', e.suit === "&hearts;" || e.suit === "&diams;" ? "red" : "black")
+            div2.dataset.suit = `${e.suit}`
+            div2.dataset.value = `${e.value}`
+            div2.innerHTML = `${e.suit}`
+            div2.dataset.id = `${playerDetails[1].player}`
+            // if (playerDetails[1].player === 'playerOne') div2.setAttribute("draggable", "true")
+            computer1Hand.appendChild(div2)
         })
         computer1SlotDeck.innerText = playerDetails[2].Deck.numberOfCards
         p3.cards.forEach((e) => {
-            div = document.createElement('div')
-            div.classList.add('card', e.suit === "&hearts;" || e.suit === "&diams;" ? "red" : "black")
-            div.dataset.suit = `${e.suit}`
-            div.dataset.value = `${e.value}`
-            div.innerHTML = `${e.suit}`
-            div.dataset.id = `${playerDetails[2].player}`
-            if (playerDetails[2].player === 'playerOne') div.setAttribute("draggable", "true")
-            computer2Hand.appendChild(div)
+            div3 = document.createElement('div')
+            div3.classList.add('card', e.suit === "&hearts;" || e.suit === "&diams;" ? "red" : "black")
+            div3.dataset.suit = `${e.suit}`
+            div3.dataset.value = `${e.value}`
+            div3.innerHTML = `${e.suit}`
+            div3.dataset.id = `${playerDetails[2].player}`
+            // if (playerDetails[2].player === 'playerOne') div3.setAttribute("draggable", "true")
+            computer2Hand.appendChild(div3)
         })
         if (playerDetails[0].Deck.numberOfCards === 10 &&
-            playerDetails[1].Deck.numberOfCards === 10 && playerDetails[2].Deck.numberOfCards === 10) createTable()
+            playerDetails[1].Deck.numberOfCards === 10 && 
+            playerDetails[2].Deck.numberOfCards === 10) createTable()
     }
 
     //move and throw the cards in table pit load all animations in this function
@@ -224,18 +230,20 @@ document.addEventListener("DOMContentLoaded", () => {
         // if(roundCount<=10) await gameLogic(), roundCount++
         // else isGameOver = true
 
-        let roundPromise = new Promise((resolve, reject) => {
-            if (roundCount === 10) resolve()
-            else reject()
-        })
-        roundPromise.then(() => {
-            isGameOver = true
-            console.log('Game Over')
+        // let roundPromise = new Promise((resolve, reject) => {
+        //     if (roundCount === 10) resolve()
+        //     else reject()
+        // })
+        // roundPromise.then(() => {
+        //     isGameOver = true
+        //     console.log('Game Over')
 
-        }).catch(() => {
-            gameLogic()
-        })
-        // gameLogic()
+        // }).catch(() => {
+        //     gameLogic()
+        // })
+        console.log(Table)
+
+        gameLogic()
     }
 
     //Game Logic
@@ -243,9 +251,15 @@ document.addEventListener("DOMContentLoaded", () => {
         //create a wheel cycle by which game will be played and make a logic for suit checker and play that suit only
         if (isGameOver) return
         let player1HandDiv = player1Hand.querySelectorAll(`[data-id='playerOne']`)
+        let player2HandDiv = player1Hand.querySelectorAll(`[data-id='AI1']`)
+        let player3HandDiv = player1Hand.querySelectorAll(`[data-id='AI2']`)
+
 
         player1HandDiv.forEach(c => c.addEventListener('dragstart', dragStart))
-        tablePit.addEventListener('dragstart', dragStart)
+        player2HandDiv.forEach(c => c.addEventListener('dragstart', dragStart))
+        player3HandDiv.forEach(c => c.addEventListener('dragstart', dragStart))
+
+        _dragStart = tablePit.addEventListener('dragstart', dragStart)
         tablePit.addEventListener('dragover', dragOver)
         tablePit.addEventListener('dragenter', dragEnter)
         tablePit.addEventListener('drop', dragDrop)
@@ -253,12 +267,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
         function dragStart() {
             if (playerDetails[0].Turn) player1DeckCardIndex = this
+            if (playerDetails[1].Turn) player2DeckCardIndex = this,console.log('dragged AI1')
+            if (playerDetails[2].Turn) player3DeckCardIndex = this
         }
         function dragOver(e) {
             e.preventDefault()
         }
         function dragEnter(e) {
-            e.preventDefault()
         }
         function dragDrop(e) {
             if (playerDetails.filter(e => e.Go === 1)[0].Go === 1) {
@@ -276,6 +291,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // get turn play the game in array for better security
             if (playerDetails.filter(e => e.Turn === true)[0].player === e.target.dataset.id) {
                 nextTurn()
+                console.log(tablePit)
             }
 
         })
@@ -284,78 +300,110 @@ document.addEventListener("DOMContentLoaded", () => {
         //     roundWinner(cardOne, cardTwo, cardThree)
         // }
     }
+    // Next turn loops two times stop fix that
     function nextTurn() {
-        let currentPlayerTurnFilter = playerDetails.filter(e => e.Go === 1),
-            currentPlayerTurn
+        // make a turn wheel system to calculate who will go next
 
-        if (currentPlayerTurn === 1) {
-        }
-        if (tablePit.querySelectorAll('div').length === 3) {
+        if (tablePitLength >= 2) {
             roundCount++
+            console.log('hit', tablePit.querySelectorAll('div').length)
+            roundWinner(thisTurnPit[0].card.value, thisTurnPit[1].card.value, thisTurnPit[2].card.value)
             return
         }
         if (playerDetails[0].Turn) {
             // console.log("player hit")
             turnDisplay.innerText = 'Your Turn' + ` ${roundCount}`
-            playerTurn()
+            playerTurn(playerDetails[0].player, playerDetails[0].Go)
         }
         if (playerDetails[1].Turn) {
             // console.log(`${playerDetails[1].player} hit`)
             turnDisplay.innerText = 'AI 1 Turn' + ` ${roundCount}`
-            computerTurn(playerDetails[1].player)
+            computerTurn(playerDetails[1].player, playerDetails[1].Go)
         }
         if (playerDetails[2].Turn) {
             // console.log(`${playerDetails[2].player} hit`)
             turnDisplay.innerText = 'AI 2 Turn' + ` ${roundCount}`
-            computerTurn(playerDetails[2].player)
+            computerTurn(playerDetails[2].player, playerDetails[2].Go)
         }
     }
-    function playerTurn() {
-        let lks=playerDetails[0].Deck.cards.filter(e => e.suit === player1DeckCardIndex.dataset.suit && e.value === player1DeckCardIndex.dataset.value)
-        thisTurnPit[0].player = 'playerOne'
-        thisTurnPit[0].card.suit = lks[0].suit
-        thisTurnPit[0].card.value = lks[0].value
-        playerDetails[0].Deck.cards.splice(lks,1)
-        console.log(thisTurnPit)
+    function playerTurn(player, index) {
+        // Logic for throwing cards in pit and splicing card from hand
+        throwCardsInPit(player, index, player1DeckCardIndex)
+        // console.log("from playerOne", player1DeckCardIndex)
         playerDetails[0].Turn = false
         playerDetails[1].Turn = true
-        // if (sad) {
-        //     sad = false
-        //     nextTurn()
-        // }
     }
 
-    function computerTurn(e) {
-        if (e === 'AI1') {
+    function computerTurn(player, index) {
+        if (player === 'AI1') {
             //write a function for AI1 to play card
-            AIPlayer(playerDetails[1].Deck)
             playerDetails[1].Turn = false
             playerDetails[2].Turn = true
+            AIPlayer(player, playerDetails[1].Deck, index, document.querySelectorAll('[data-id="AI1"]'), player2DeckCardIndex)
         }
-        if (e === 'AI2') {
+        if (player === 'AI2') {
             //write a function for AI2 to play card
-            AIPlayer(playerDetails[2].Deck)
             playerDetails[0].Turn = true
             playerDetails[2].Turn = false
-            turnDisplay.innerText = 'Your Turn' + ` ${roundCount}`
+            AIPlayer(player, playerDetails[2].Deck, index, document.querySelectorAll('[data-id="AI2"]'), player3DeckCardIndex)
         }
 
     }
-    function AIPlayer(e) {
+    function AIPlayer(player, deck, index, div, playerDeckIndex) {
 
-        let tableSuit = [], tableValue = [], cardToPlay
-        let cardsInPit
-        let maxVal
-        thisTurnPit.forEach((c) => {
-            maxVal = Math.max(CARD_VALUE_MAP[c.card.value])
-            c.card.suit
-        })
-        // let cardValueChecker = e.filter(m => m.suit === tableSuit[0]).forEach((z) => {
-        //     let test = Math.max(CARD_VALUE_MAP[z.value], CARD_VALUE_MAP[tableValue])
+        let aiCard = div[0],
+            cardsInPit = thisTurnPit.filter(i => i.player !== '').length
+        // console.log(playerDeckIndex)
+        let maxVal = []
+        // thisTurnPit.forEach((c) => {
+        //     maxVal.push(c.card.cardValue)
+        //     c.card.suit
         // })
-        console.log("hit AIPlayer")
+        // tablePit.dispatchEvent(_dragStart)
+        playerDeckIndex = aiCard
+        tablePit.append(aiCard)
+        
+        // console.log(playerDetails[1])
+        throwCardsInPit(player, index, playerDeckIndex)
     }
+    // function DragDropAI(eventName, element, data) {
+    //     'use strict';
+    //     var event;
+    //     data = data || {}
+    //     if (document.createEvent) {
+    //         event = document.createEvent("HTMLEvents")
+    //         event.initEvent(eventName, true, true)
+    //     } else {
+    //         event = document.createEventObject()
+    //         event.eventType = eventName
+    //     }
 
+    //     event.eventName = eventName
+    //     // event = $.extend(event, data)
+
+    //     if (document.createEvent) {
+    //         element.dispatchEvent(event)
+    //     } else {
+    //         element.fireEvent("on" + event.eventType, event)
+    //     }
+    // }
+//Looping two times thats y its give a null reference error
+    function throwCardsInPit(player, index, playerDeckIndex) {
+        let lks = playerDetails[index].Deck.cards.filter(e => e.suit === playerDeckIndex.dataset.suit && e.value === playerDeckIndex.dataset.value)
+        console.log(lks)
+
+        playerObj['player'] = player
+        cardObj.card['suit'] = lks[0].suit
+        cardObj.card['value'] = lks[0].value
+        cardObj.card['cardValue'] = CARD_VALUE_MAP[lks[0].value]
+        thisTurnPit.push(playerObj,cardObj)
+        console.log(thisTurnPit)
+        // thisTurnPit[index].push.card.value = lks[0].value
+        // thisTurnPit[index].push.card.cardValue = CARD_VALUE_MAP[lks[0].value]
+        playerDetails[index].Deck.cards.splice(lks, 1)
+        tablePitLength = thisTurnPit.length
+        console.log(tablePitLength ,thisTurnPit)
+    }
     function roundWinner(cardOne, cardTwo, cardThree) {
         return Math.max(CARD_VALUE_MAP[cardOne], CARD_VALUE_MAP[cardTwo], CARD_VALUE_MAP[cardThree])
     }

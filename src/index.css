@@ -83,7 +83,9 @@ transform: rotate(180deg);
     gap: 1em;
 }
 .table-pit{
+    display: grid;
+    grid-template-columns: repeat(auto-fit,minmax(30%,30%));
     background-color: green;
-    width: 250px;
+    width: 100%;
     height: 250px;
 }
