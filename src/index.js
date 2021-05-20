@@ -1,7 +1,7 @@
 import Deck from "./deck.js"
-import Table from "./deck.js"
-import PlayerDeck from "./deck.js"
-import Round from "./deck.js"
+import Table from "./table.js"
+import PlayerDeck from "./table.js"
+import Round from "./table.js"
 
 FBInstant.initializeAsync()
     .then(function () {
@@ -21,12 +21,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const turnDisplay = document.querySelector('.turn-display')
     const tablePit = document.querySelector('.table-pit')
     //All global Variables Goes Here
-    const removeCardsinDeck = []
-    let player2Deck, selectATrump, selectedTrump,
+    
+    let selectATrump, selectedTrump,
         p1 = [{ 'cards': [] }], p2 = [{ 'cards': [] }], p3 = [{ 'cards': [] }],
         gameMode = "singlePlayer", playerNum = 0, ready = false, enemyReady = false, currentTurnSuit,
         player1DeckCardIndex, player2DeckCardIndex, player3DeckCardIndex, tablePitLength
-    const deck = new Deck()
+
+    const deck = new Deck(), table = new Table()
     const CARD_VALUE_MAP = {"6": 6,"7": 7,"8": 8,"9": 9,"10": 10,"J": 11,"Q": 12,"K": 13,"A": 14}
 
     //All Game Logic variable, like table created cards dispensed to players
@@ -45,31 +46,15 @@ document.addEventListener("DOMContentLoaded", () => {
         startGame()
     })
     function startGame() {
-        const table = new Table()
-        table.gameMode = 'Singlelayer'
-        // table.maxRounds = 9
-        table.test = 'muni'
-        console.log(table.gameMode,table.maxRounds)
-        loopDeleteCards(removeCardsinDeck)
-        deck.removeCards(removeCardsinDeck)
+        // table.gameMode = 'Singlelayer'
+        // // table.maxRounds = 9
+        // table.test = 'muni'
+        console.log(deck)
+        console.log(table.gameMode,table.maxRounds,table.maxPlayers)
+        deck.removeCards()
+       
         deck.shuffle()
         cleanBeforeRound()
-    }
-
-    // this function selects cards for 3-2-5 to remove from deck
-    function loopDeleteCards() {
-        for (let i = 2; i <= 6; i++) {
-            removeCardsinDeck.push({ suit: "&hearts;", value: `${i}` })
-        }
-        for (let i = 2; i <= 6; i++) {
-            removeCardsinDeck.push({ suit: "&spades;", value: `${i}` })
-        }
-        for (let i = 2; i <= 7; i++) {
-            removeCardsinDeck.push({ suit: "&diams;", value: `${i}` })
-        }
-        for (let i = 2; i <= 7; i++) {
-            removeCardsinDeck.push({ suit: "&clubs;", value: `${i}` })
-        }
     }
 
     function cleanBeforeRound() {
@@ -186,6 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
             div1.classList.add('card', e.suit === "&hearts;" || e.suit === "&diams;" ? "red" : "black")
             div1.dataset.suit = `${e.suit}`
             div1.dataset.value = `${e.value}`
+            div1.dataset.mapVal = `${e.mapVal}`
             div1.innerHTML = `${e.suit}`
             div1.dataset.id = `${playerDetails[0].player}`
             if (playerDetails[0].player === 'playerOne') div1.setAttribute("draggable", "true")
@@ -200,6 +186,7 @@ document.addEventListener("DOMContentLoaded", () => {
             div2.classList.add('card', e.suit === "&hearts;" || e.suit === "&diams;" ? "red" : "black")
             div2.dataset.suit = `${e.suit}`
             div2.dataset.value = `${e.value}`
+            div2.dataset.mapVal = `${e.mapVal}`
             div2.innerHTML = `${e.suit}`
             div2.dataset.id = `${playerDetails[1].player}`
             // if (playerDetails[1].player === 'playerOne') div2.setAttribute("draggable", "true")
@@ -211,6 +198,7 @@ document.addEventListener("DOMContentLoaded", () => {
             div3.classList.add('card', e.suit === "&hearts;" || e.suit === "&diams;" ? "red" : "black")
             div3.dataset.suit = `${e.suit}`
             div3.dataset.value = `${e.value}`
+            div3.dataset.mapVal = `${e.mapVal}`
             div3.innerHTML = `${e.suit}`
             div3.dataset.id = `${playerDetails[2].player}`
             // if (playerDetails[2].player === 'playerOne') div3.setAttribute("draggable", "true")
@@ -241,8 +229,6 @@ document.addEventListener("DOMContentLoaded", () => {
         // }).catch(() => {
         //     gameLogic()
         // })
-        console.log(Table)
-
         gameLogic()
     }
 
